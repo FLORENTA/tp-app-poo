@@ -1,6 +1,8 @@
 <?php
 namespace OCFram;
 
+define("S", DIRECTORY_SEPARATOR);
+
 abstract class BackController extends ApplicationComponent
 {
   protected $action = '';
@@ -8,6 +10,9 @@ abstract class BackController extends ApplicationComponent
   protected $page = null;
   protected $view = '';
   protected $managers = null;
+
+  const DATASFOLDER = __DIR__ . S . ".." . S . ".." . S . "tmp" . S . "cache" . S . "datas" . S;
+  const VIEWSFOLDER = __DIR__ . S . ".." . S . ".." . S . "tmp" . S . "cache" . S . "views" . S;
 
   public function __construct(Application $app, $module, $action)
   {
@@ -79,4 +84,56 @@ abstract class BackController extends ApplicationComponent
 
     $this->page->setContentFile(__DIR__.'/../../App/'.$this->app->name().'/Modules/'.$this->module.'/Views/'.$this->view.'.php', false);
   }
+
+    public function removeFromCache($news = null, $comment)
+    {
+        /* Si c'est un commentaire qui est édité ou supprimé, alors on ne supprime pas les
+           éléments en cache de la partie admin... sinon, on supprime
+        */
+        if(false === $comment) {
+
+            if (is_file(self::DATASFOLDER . $this->app->name() . $this->getModule() . "admin.txt")) {
+                unlink(self::DATASFOLDER . $this->app->name() . $this->getModule() . "admin.txt");
+            }
+
+            if (is_file(self::VIEWSFOLDER . $this->app->name() . $this->getModule() . "admin.txt")) {
+                unlink(self::VIEWSFOLDER . $this->app->name() . $this->getModule() . "admin.txt");
+            }
+        }
+
+        /* Si on a ajouté un nouvel article, alors on supprime également la page d'accueil de la partie utilisateur */
+        /* $news peut valoir "News" (dans le cas d'un ajout) ou l'id d'une news si "Modification/Suppression d'une news */
+        if(!is_null($news))
+        {
+            /* Si c'est un commentaire qui est édité ou supprimé, alors on ne supprime pas les
+               éléments en cache de la partie admin... sinon, on supprime
+            */
+            if(false === $comment)
+            {
+                if (is_file(self::DATASFOLDER . "FrontendNews.txt"))
+                {
+                    unlink(self::DATASFOLDER . "FrontendNews.txt");
+                }
+
+                if (is_file(self::VIEWSFOLDER . "FrontendNews.txt"))
+                {
+                    unlink(self::VIEWSFOLDER . "FrontendNews.txt");
+                }
+            }
+
+            /* Si $news vaut un id de news, alors on supprime la vue et les données en cache correspondant à celle-ci */
+            if(is_numeric($news))
+            {
+                if(is_file(self::DATASFOLDER . "FrontendNewsnews-".$news.".txt"))
+                {
+                    unlink(self::DATASFOLDER . "FrontendNewsnews-".$news.".txt");
+                }
+
+                if(is_file(self::VIEWSFOLDER . "FrontendNewsnews-".$news.".txt"))
+                {
+                    unlink(self::VIEWSFOLDER . "FrontendNewsnews-".$news.".txt");
+                }
+            }
+        }
+    }
 }

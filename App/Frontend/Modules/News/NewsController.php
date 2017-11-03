@@ -23,7 +23,7 @@ class NewsController extends BackController
     $manager = $this->managers->getManagerOf('News');
     
     $listeNews = $manager->getList(0, $nombreNews);
-    
+
     foreach ($listeNews as $news)
     {
       if (strlen($news->contenu()) > $nombreCaracteres)
@@ -82,6 +82,12 @@ class NewsController extends BackController
       
       $this->app->httpResponse()->redirect('news-'.$request->getData('news').'.html');
     }
+
+    /*
+        Envoi de l'id correspondant à la vue à laquelle on ajoute des commentaires
+        pour supprimer les fichiers de données et vue front correspondant en cache
+    */
+    $this->removeFromCache($request->getData('news'), true);
 
     $this->page->addVar('comment', $comment);
     $this->page->addVar('form', $form->createView());

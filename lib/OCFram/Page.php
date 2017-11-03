@@ -5,6 +5,7 @@ class Page extends ApplicationComponent
 {
   protected $contentFile;
   protected $vars = [];
+  protected $content;
 
   public function addVar($var, $value)
   {
@@ -21,8 +22,12 @@ class Page extends ApplicationComponent
       return $this->vars;
   }
 
-  public function getView()
+  public function getContent()
   {
+      /* Mise en cache de "$user"
+         Si authentifié au moment de la mise en cache...
+         l'interface de l'admin s'affichera pour les non authentifiés !...
+      */
       $user = $this->app->user();
 
       extract($this->vars);
@@ -32,11 +37,22 @@ class Page extends ApplicationComponent
       return ob_get_clean();
   }
 
+  public function getView()
+  {
+      $user = $this->app->user();
+
+      $content = $this->content;
+
+      ob_start();
+        require __DIR__.'/../../App/'.$this->app->name().'/Templates/layout.php';
+      return ob_get_clean();
+  }
+
   public function getGeneratedPage()
   {
     if (!file_exists($this->contentFile))
     {
-      //throw new \RuntimeException('La vue spécifiée n\'existe pas');
+      throw new \RuntimeException('La vue spécifiée n\'existe pas');
     }
 
     $user = $this->app->user();

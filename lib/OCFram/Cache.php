@@ -23,28 +23,8 @@ class Cache
         $this->uri = $uri;
         $this->datasFolder = __DIR__ . DS . ".." . DS . ".." . DS . "tmp" . DS . "cache" . DS . "datas";
         $this->viewsFolder = __DIR__ . DS . ".." . DS . ".." . DS . "tmp" . DS . "cache" . DS . "views";
-        $this->datasFilename = $this->datasFolder . DS . $this->app . DS . $this->module . DS . $this->uri . ".txt";
-        $this->viewFilename = $this->viewsFolder . DS . $this->app . DS . $this->module . DS . $this->action . ".txt";
-
-        if(!is_dir($this->datasFolder . DS . $this->app))
-        {
-            mkdir($this->datasFolder . DS . $this->app);
-        }
-
-        if(!is_dir($this->viewsFolder . DS . $this->app))
-        {
-            mkdir($this->viewsFolder . DS . $this->app);
-        }
-
-        if(!is_dir($this->datasFolder . DS . $this->app . DS . $this->module))
-        {
-            mkdir($this->datasFolder . DS . $this->app . DS . $this->module);
-        }
-
-        if(!is_dir($this->viewsFolder . DS . $this->app . DS . $this->module))
-        {
-            mkdir($this->viewsFolder . DS . $this->app . DS . $this->module);
-        }
+        $this->datasFilename = $this->datasFolder . DS . $this->app . $this->module . $this->uri . ".txt";
+        $this->viewFilename = $this->viewsFolder . DS . $this->app . $this->module . $this->uri . ".txt";
     }
 
     public function isInCache()
@@ -60,29 +40,75 @@ class Cache
 
     public function createCache($datas, $view)
     {
-        file_put_contents($this->datasFilename, time() . "\r\n" . serialize($datas));
-        file_put_contents($this->viewFilename, time() . "\r\n" . $view);
+        $expirationDate = time() + 10;
+
+        /* On met les infos dans le fichier, avec une date d'expiration de 10 secondes (pour le test) */
+        file_put_contents($this->datasFilename, $expirationDate . "\r\n" . serialize($datas));
+        file_put_contents($this->viewFilename, $expirationDate . "\r\n" . $view);
     }
 
     public function generateViewFromCache($page)
     {
+        /* Date actuelle */
+        $currentTime = time();
+
         /* On récupère le fichier de données en cache */
         $datas = file($this->datasFilename);
-        /* Retrait du timestamp */
+
+        /* Récupération de la date d'expiration */
+        $datasExpirationDate = $datas[0];
+
+        /* Si date d'expiration du fichier de données dépassée */
+        /* On supprime le fichier de données et la vue */
+        /* Etant donnée que le fichier de données et la vue en cache ont
+           la même date d'expiration, une seule vérification par rapport
+           au fichier de données suffit ...
+        */
+        if($currentTime > $datasExpirationDate)
+        {
+            /* Suppression du fichier de données */
+            unlink($this->datasFilename);
+
+            /* Suppression de la vue */
+            unlink($this->viewFilename);
+
+            /* On redirige */
+            header("location: .");
+        }
+
+        /* Sinon, le fichier n'a pas expiré */
+        /* Retrait du timestamp du tableau */
         unset($datas[0]);
+
         /* Désérialisation des données */
         $datas = unserialize($datas[1]);
 
-        /* On récupère le fichier de la vue en cache (correspondant à l'uri) */
+        /* On récupère la vue en cache (correspondant à l'uri...) */
         $view = file_get_contents($this->viewFilename);
-        var_dump($view);die;
-        unset($view[0]);
 
-        $page->addVar('title', $datas["title"]);
-        $page->addVar('news', $datas["news"]);
-        $page->addVar('comments', $datas["comments"]);
+        /* Spécification de Frontend car même méthode dans le backend ... */
+        if($this->app === "Frontend" && $this->action === "index")
+        {
+            $page->addVar("title", $datas["title"]);
+            $page->addVar("listeNews", $datas["listeNews"]);
+        }
 
-        $page->setPage($view[1]);
+        if($this->app === "Frontend" && $this->action === "show")
+        {
+            $page->addVar('title', $datas["title"]);
+            $page->addVar('news', $datas["news"]);
+            $page->addVar('comments', $datas["comments"]);
+        }
+
+        if($this->app = "Frontend" && $this->action === "insertComment")
+        {
+            $page->addVar('comment', $datas["comment"]);
+            $page->addVar('form', $datas["form"]);
+            $page->addVar('title', $datas["title"]);
+        }
+
+        /* Substr to remove the timestamp from the txt file */
+        $page->setPage(substr($view, 10));
 
         return $page;
     }

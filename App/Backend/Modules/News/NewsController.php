@@ -14,9 +14,13 @@ class NewsController extends BackController
   public function executeDelete(HTTPRequest $request)
   {
     $newsId = $request->getData('id');
-    
+
     $this->managers->getManagerOf('News')->delete($newsId);
     $this->managers->getManagerOf('Comments')->deleteFromNews($newsId);
+
+    /* Si un fichier de données et une vue existent, on les supprime */
+    /* Aussi bien pour la partie back que front */
+    $this->removeFromCache($newsId, false);
 
     $this->app->user()->setFlash('La news a bien été supprimée !');
 
@@ -25,6 +29,9 @@ class NewsController extends BackController
 
   public function executeDeleteComment(HTTPRequest $request)
   {
+    /* On récupère l'id de la news à laquelle le commentaire est associé */
+    $this->removeFromCache($this->managers->getManagerOf('Comments')->get($request->getData('id'))->news(), true);
+
     $this->managers->getManagerOf('Comments')->delete($request->getData('id'));
     
     $this->app->user()->setFlash('Le commentaire a bien été supprimé !');
@@ -46,12 +53,20 @@ class NewsController extends BackController
   {
     $this->processForm($request);
 
+    /* Si un fichier de données et une vue existent, on les supprime */
+    /* Aussi bien pour la partie back que front */
+    $this->removeFromCache("News", false);
+
     $this->page->addVar('title', 'Ajout d\'une news');
   }
 
   public function executeUpdate(HTTPRequest $request)
   {
     $this->processForm($request);
+
+    /* Si un fichier de données et une vue existent, on les supprime */
+    /* Aussi bien pour la partie back que front */
+    $this->removeFromCache($request->getData('id'), false);
 
     $this->page->addVar('title', 'Modification d\'une news');
   }
@@ -67,10 +82,16 @@ class NewsController extends BackController
         'auteur' => $request->postData('auteur'),
         'contenu' => $request->postData('contenu')
       ]);
+
+        /* Si un fichier de données et une vue existent, on les détruit pour les regénérer à nouveau */
     }
     else
     {
       $comment = $this->managers->getManagerOf('Comments')->get($request->getData('id'));
+
+      /* Si un fichier de données et une vue existent, on les supprime */
+      /* Pour la partie front uniquement */
+      $this->removeFromCache($comment->news(), true);
     }
 
     $formBuilder = new CommentFormBuilder($comment);

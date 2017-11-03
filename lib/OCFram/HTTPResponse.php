@@ -36,7 +36,7 @@ class HTTPResponse extends ApplicationComponent
 
   public function sendCachedView()
   {
-      exit($this->page->getGeneratedPageFromCache());
+      exit($this->page->getView());
   }
 
   public function setPage(Page $page)

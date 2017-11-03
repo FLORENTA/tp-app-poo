@@ -1,0 +1,9 @@
+1509726511
+<p style="text-align: center">Il y a actuellement 3 news. En voici la liste :</p>
+
+<table>
+  <tr><th>Auteur</th><th>Titre</th><th>Date d'ajout</th><th>Dernière modification</th><th>Action</th></tr>
+<tr><td>TestINE</td><td>Testo</td><td>le 03/11/2017 à 16h55</td><td>le 03/11/2017 à 17h23</td><td><a href="news-update-18.html"><img src="/images/update.png" alt="Modifier" /></a> <a href="news-delete-18.html"><img src="/images/delete.png" alt="Supprimer" /></a></td></tr>
+<tr><td>Super</td><td>Super</td><td>le 03/11/2017 à 16h05</td><td>-</td><td><a href="news-update-17.html"><img src="/images/update.png" alt="Modifier" /></a> <a href="news-delete-17.html"><img src="/images/delete.png" alt="Supprimer" /></a></td></tr>
+<tr><td>Flo</td><td>Testa</td><td>le 03/11/2017 à 15h47</td><td>le 03/11/2017 à 16h04</td><td><a href="news-update-16.html"><img src="/images/update.png" alt="Modifier" /></a> <a href="news-delete-16.html"><img src="/images/delete.png" alt="Supprimer" /></a></td></tr>
+</table>
