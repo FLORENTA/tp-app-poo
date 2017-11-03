@@ -16,11 +16,27 @@ class Page extends ApplicationComponent
     $this->vars[$var] = $value;
   }
 
+  public function getVars()
+  {
+      return $this->vars;
+  }
+
+  public function getView()
+  {
+      $user = $this->app->user();
+
+      extract($this->vars);
+
+      ob_start();
+        require $this->contentFile;
+      return ob_get_clean();
+  }
+
   public function getGeneratedPage()
   {
     if (!file_exists($this->contentFile))
     {
-      throw new \RuntimeException('La vue spécifiée n\'existe pas');
+      //throw new \RuntimeException('La vue spécifiée n\'existe pas');
     }
 
     $user = $this->app->user();
@@ -40,9 +56,14 @@ class Page extends ApplicationComponent
   {
     if (!is_string($contentFile) || empty($contentFile))
     {
-      throw new \InvalidArgumentException('La vue spécifiée est invalide');
+        throw new \InvalidArgumentException('La vue spécifiée est invalide');
     }
 
     $this->contentFile = $contentFile;
+  }
+
+  public function setPage($view)
+  {
+      $this->content = $view;
   }
 }

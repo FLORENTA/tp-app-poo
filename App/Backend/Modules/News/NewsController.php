@@ -134,9 +134,4 @@ class NewsController extends BackController
 
     $this->page->addVar('form', $form->createView());
   }
-
-    public function createCache()
-    {
-        //renvoie un tableau de la forme ['nomdelavue' => 'duree']
-    }
 }

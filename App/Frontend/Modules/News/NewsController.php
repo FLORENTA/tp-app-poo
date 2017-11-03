@@ -3,6 +3,7 @@
 namespace App\Frontend\Modules\News;
 
 use \OCFram\BackController;
+use OCFram\Cache;
 use \OCFram\HTTPRequest;
 use \Entity\Comment;
 use \FormBuilder\CommentFormBuilder;
@@ -85,10 +86,5 @@ class NewsController extends BackController
     $this->page->addVar('comment', $comment);
     $this->page->addVar('form', $form->createView());
     $this->page->addVar('title', 'Ajout d\'un commentaire');
-  }
-
-  public function createCache()
-  {
-      //renvoie un tableau de la forme ['nomdelavue' => 'duree']
   }
 }
